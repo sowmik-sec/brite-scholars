@@ -1,6 +1,8 @@
 import { Link, NavLink } from "react-router-dom";
 import logo from "../../assets/higher-education.png";
+import useAuth from "../../hooks/useAuth";
 function Navbar() {
+  const { user, logout } = useAuth();
   const navItems = (
     <>
       <li>
@@ -14,6 +16,11 @@ function Navbar() {
       </li>
     </>
   );
+  const handleLogout = () => {
+    logout()
+      .then()
+      .catch((err) => console.error(err));
+  };
   return (
     <div className="navbar bg-base-100">
       <div className="navbar-start">
@@ -48,9 +55,28 @@ function Navbar() {
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1">{navItems}</ul>
       </div>
-      <Link to="/login" className="navbar-end">
-        Login
-      </Link>
+      {user ? (
+        <div className="navbar-end">
+          <img
+            src={user?.photoURL}
+            title={user?.displayName}
+            className="w-14 h-14 rounded-full mr-2 hover:cursor-pointer"
+            alt=""
+          />
+          <p
+            onClick={handleLogout}
+            className="hover:cursor-pointer hover:bg-green-400 px-3 py-2 rounded-md"
+          >
+            Logout
+          </p>
+        </div>
+      ) : (
+        <>
+          <Link to="/login" className="navbar-end">
+            Login
+          </Link>
+        </>
+      )}
     </div>
   );
 }
