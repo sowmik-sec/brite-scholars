@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import { useState } from "react";
 import Swal from "sweetalert2";
+import useAxiosPublic from "../../hooks/useAxiosPublic";
 
 function Signup() {
   const {
@@ -10,23 +11,37 @@ function Signup() {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const { createUser } = useAuth();
+  const { createUser, updateUser } = useAuth();
   const [signUpError, setSignUpError] = useState("");
   const navigate = useNavigate();
+  const axiosPublic = useAxiosPublic();
 
   const onSubmit = (data) => {
     console.log(data);
     createUser(data.email, data.password)
       .then((userCredential) => {
         console.log(userCredential);
-        Swal.fire({
-          position: "top-end",
-          icon: "success",
-          title: "You've signed up successfully",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-        navigate("/");
+        updateUser(data.name, data.photo)
+          .then(() => {
+            const userInfo = {
+              name: data.name,
+              email: data.email,
+            };
+            axiosPublic.post("/users", userInfo).then((res) => {
+              if (res.data.insertedId) {
+                //   reset();
+                Swal.fire({
+                  position: "top-end",
+                  icon: "success",
+                  title: "User created successfully.",
+                  showConfirmButton: false,
+                  timer: 1500,
+                });
+                navigate("/");
+              }
+            });
+          })
+          .catch((err) => setSignUpError(err.message));
       })
       .catch((err) => setSignUpError(err.message));
   };
