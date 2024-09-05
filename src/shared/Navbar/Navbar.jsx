@@ -57,12 +57,14 @@ function Navbar() {
       </div>
       {user ? (
         <div className="navbar-end">
-          <img
-            src={user?.photoURL}
-            title={user?.displayName}
-            className="w-14 h-14 rounded-full mr-2 hover:cursor-pointer"
-            alt=""
-          />
+          <Link to="/user">
+            <img
+              src={user?.photoURL}
+              title={user?.displayName}
+              className="w-14 h-14 rounded-full mr-2 hover:cursor-pointer"
+              alt=""
+            />
+          </Link>
           <p
             onClick={handleLogout}
             className="hover:cursor-pointer hover:bg-green-400 px-3 py-2 rounded-md"
