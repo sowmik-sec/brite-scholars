@@ -1,19 +1,39 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LoadCanvasTemplate,
   loadCaptchaEnginge,
   validateCaptcha,
 } from "react-simple-captcha";
+import useAuth from "../../hooks/useAuth";
+import Swal from "sweetalert2";
 
 function Login() {
   const { register, handleSubmit } = useForm();
   const [captchaText, setCaptchaText] = useState("");
   const [disableLoginBtn, setDisableLoginBtn] = useState(true);
+  const { login } = useAuth();
+  const [loginError, setLoginError] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
 
   const onSubmit = (data) => {
     console.log(data);
+    login(data.email, data.password)
+      .then((userCredential) => {
+        console.log(userCredential);
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "You've signed up successfully",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        navigate(from, { replace: true });
+      })
+      .catch((err) => setLoginError(err.message));
   };
   const handleCaptcha = (e) => {
     e.preventDefault();
@@ -32,9 +52,9 @@ function Login() {
         <div className="lg:w-1/2 text-center lg:text-left">
           <h1 className="text-5xl font-bold">Login now!</h1>
           <p className="py-6">
-            Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
-            excepturi exercitationem quasi. In deleniti eaque aut repudiandae et
-            a id nisi.
+            Empower your future. Sign up now to access exclusive scholarships,
+            resources, and mentorship that will help you achieve your academic
+            goals.
           </p>
         </div>
         <div className="lg:w-1/2 card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
@@ -97,6 +117,9 @@ function Login() {
               </Link>
             </p>
           </form>
+          {loginError && (
+            <p className="text-red-600 text-center">{loginError}</p>
+          )}
         </div>
       </div>
     </div>
