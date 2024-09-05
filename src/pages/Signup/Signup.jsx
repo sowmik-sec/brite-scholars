@@ -1,5 +1,8 @@
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
+import { useState } from "react";
+import Swal from "sweetalert2";
 
 function Signup() {
   const {
@@ -7,9 +10,25 @@ function Signup() {
     handleSubmit,
     formState: { errors },
   } = useForm();
+  const { createUser } = useAuth();
+  const [signUpError, setSignUpError] = useState("");
+  const navigate = useNavigate();
 
   const onSubmit = (data) => {
     console.log(data);
+    createUser(data.email, data.password)
+      .then((userCredential) => {
+        console.log(userCredential);
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "You've signed up successfully",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        navigate("/");
+      })
+      .catch((err) => setSignUpError(err.message));
   };
 
   return (
@@ -18,9 +37,9 @@ function Signup() {
         <div className="lg:w-1/2 text-center lg:text-left">
           <h1 className="text-5xl font-bold">Signup now!</h1>
           <p className="py-6">
-            Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda
-            excepturi exercitationem quasi. In deleniti eaque aut repudiandae et
-            a id nisi.
+            Ready to unlock your potential? Join our community of driven
+            individuals and discover the scholarship opportunities that can make
+            your dreams a reality.
           </p>
         </div>
         <div className="lg:w-1/2 card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
@@ -113,6 +132,7 @@ function Signup() {
               </Link>
             </p>
           </form>
+          {signUpError && <p className="text-red-600">{signUpError}</p>}
         </div>
       </div>
     </div>
