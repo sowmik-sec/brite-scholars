@@ -1,6 +1,7 @@
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
@@ -37,6 +38,11 @@ function AuthProvider({ children }) {
     return signOut(auth);
   };
 
+  const resetPassword = (email) => {
+    setLoading(true);
+    return sendPasswordResetEmail(auth, email);
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -45,7 +51,15 @@ function AuthProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
-  const authInfo = { user, loading, createUser, login, logout, updateUser };
+  const authInfo = {
+    user,
+    loading,
+    createUser,
+    login,
+    resetPassword,
+    logout,
+    updateUser,
+  };
   return (
     <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
   );

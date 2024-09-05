@@ -10,11 +10,16 @@ import useAuth from "../../hooks/useAuth";
 import Swal from "sweetalert2";
 
 function Login() {
-  const { register, handleSubmit } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const [captchaText, setCaptchaText] = useState("");
   const [disableLoginBtn, setDisableLoginBtn] = useState(true);
-  const { login } = useAuth();
+  const { login, resetPassword } = useAuth();
   const [loginError, setLoginError] = useState("");
+  const [email, setEmail] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
@@ -46,6 +51,19 @@ function Login() {
   useEffect(() => {
     loadCaptchaEnginge(6);
   }, []);
+  const handlePasswordReset = () => {
+    resetPassword(email)
+      .then(() => {
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Password reset email sent",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+      })
+      .catch((err) => setLoginError(err.message));
+  };
   return (
     <div className="hero bg-base-200 min-h-screen">
       <div className="hero-content flex-col lg:flex-row">
@@ -66,10 +84,13 @@ function Login() {
               <input
                 type="email"
                 placeholder="email"
-                {...register("email")}
+                {...register("email", { required: true })}
+                onChange={(e) => setEmail(e.target.value)}
                 className="input input-bordered"
-                required
               />
+              {errors.email?.type === "required" && (
+                <p className="text-red-400">Email is required</p>
+              )}
             </div>
             <div className="form-control">
               <label className="label">
@@ -83,9 +104,12 @@ function Login() {
                 required
               />
               <label className="label">
-                <a href="#" className="label-text-alt link link-hover">
+                <button
+                  onClick={handlePasswordReset}
+                  className="label-text-alt link link-hover"
+                >
                   Forgot password?
-                </a>
+                </button>
               </label>
             </div>
             <div className="form-control">
