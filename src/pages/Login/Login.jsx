@@ -8,6 +8,7 @@ import {
 } from "react-simple-captcha";
 import useAuth from "../../hooks/useAuth";
 import Swal from "sweetalert2";
+import useAxiosPublic from "../../hooks/useAxiosPublic";
 
 function Login() {
   const {
@@ -17,12 +18,13 @@ function Login() {
   } = useForm();
   const [captchaText, setCaptchaText] = useState("");
   const [disableLoginBtn, setDisableLoginBtn] = useState(true);
-  const { login, resetPassword } = useAuth();
+  const { login, resetPassword, googleSignIn } = useAuth();
   const [loginError, setLoginError] = useState("");
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
+  const axiosPublic = useAxiosPublic();
 
   const onSubmit = (data) => {
     console.log(data);
@@ -60,6 +62,30 @@ function Login() {
           title: "Password reset email sent",
           showConfirmButton: false,
           timer: 1500,
+        });
+      })
+      .catch((err) => setLoginError(err.message));
+  };
+  const handleGoogleLogin = () => {
+    googleSignIn()
+      .then((result) => {
+        console.log(result.user);
+        const userInfo = {
+          name: result.user.displayName,
+          email: result.user.email,
+        };
+        axiosPublic.post("/users", userInfo).then((res) => {
+          if (res.data.insertedId) {
+            //   reset();
+            Swal.fire({
+              position: "top-end",
+              icon: "success",
+              title: "You've logged in successfully.",
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          }
+          navigate(from, { replace: true });
         });
       })
       .catch((err) => setLoginError(err.message));
@@ -134,13 +160,18 @@ function Login() {
                 Login
               </button>
             </div>
-            <p className="text-center mt-3">
-              New to BriteScholars?{" "}
-              <Link className="text-orange-400" to="/signup">
-                Signup
-              </Link>
-            </p>
           </form>
+          <div className="form-control mt-6">
+            <button onClick={handleGoogleLogin} className="btn btn-primary">
+              Login with Google
+            </button>
+          </div>
+          <p className="text-center mt-3">
+            New to BriteScholars?{" "}
+            <Link className="text-orange-400" to="/signup">
+              Signup
+            </Link>
+          </p>
           {loginError && (
             <p className="text-red-600 text-center">{loginError}</p>
           )}
